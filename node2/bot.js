@@ -1,18 +1,77 @@
 
+var FOLLOW_USER	= 1243678303;
+var lastTweet = null;
 console.log("hey there");
 
-var Twit = require('twit');
+var SerialPort = require('serialport').SerialPort;
+var serialPort = new SerialPort('/dev/cu.usbmodem411');
+/*serialPort.on('data', function(data) {
+  console.log('data received: ' + data);
+});*/
 
-var config = require ('./config');
-var T = new Twit(config);
+serialPort.on('open', function () {
+  console.log('open');
 
-var exec = require('child_process').exec;	
+  	setInterval(function(){
+
+  		console.log('wowowowwo');
+  		if (lastTweet){
+  			console.log('here is the last tweet: ' + lastTweet);
+
+				serialPort.write(lastTweet, function(err, results) {
+			console.log('err ' + err);
+			console.log('results ' + results);
+
+
+					}); 
+
+
+  		}
+
+  	}, 20000); 
+
+	var Twit = require('twit');
+
+	var config = require ('./config');
+	var T = new Twit(config);
+
+	//var exec = require('child_process').exec;	
+
+	var stream = T.stream('statuses/filter', { follow: FOLLOW_USER})
+
+	stream.on('tweet', function (tweet) {
+		
+
+		if (tweet.user.id == FOLLOW_USER) {
+
+			console.log(tweet.text)
+
+			lastTweet = tweet.text;
+
+				serialPort.write(tweet.text, function(err, results) {
+			console.log('err ' + err);
+			console.log('results ' + results);
+
+
+					}); 
+
+		}
+
+	
+
+	})
+
+
+
+  
+});
 
 
 
 
 
-tweetIt();
+
+/*tweetIt();
 
 var cmd = 'processing-java -- sketch=`pwd`/cats2 --run';
 
@@ -22,7 +81,7 @@ function processing(){
 	var b6
 }
 
-var tweet = {
+//var tweet = {
 	status: txt
 T.post('statuses/update', tweet, tweeted);
 
@@ -34,7 +93,7 @@ console.log ("something is not right");
 	console.log("its working!")
   		}
 	}
-}
+}*/
 
 
 
